@@ -4,6 +4,8 @@ add_library(core
     cpu.cpp
     cpu.h
     mips.h
+    log.cpp
+    log.h
 )
 
 target_link_libraries(core fmt)

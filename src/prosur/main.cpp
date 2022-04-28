@@ -10,6 +10,7 @@
 #endif
 
 #include <fmt/core.h>
+#include <fmt/os.h>
 
 #include "core/cpu.h"
 
@@ -89,7 +90,9 @@ int main(int argc, char* args[]) {
 
     CPU* cpu = new CPU(filename);
 
-    cpu->mainLoop();
+    while(cpu->running){
+        cpu->mainLoop();
+    }
 
     return 0;
 }

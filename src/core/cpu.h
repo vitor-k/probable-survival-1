@@ -19,6 +19,8 @@ public:
     CPU(const CPU&) = delete;
     CPU& operator=(const CPU&) = delete;
 
+    bool running = true;
+
 private:
     // Registers
 

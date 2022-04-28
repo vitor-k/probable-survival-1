@@ -3,6 +3,7 @@
 
 #include "cpu.h"
 #include "mips.h"
+#include "log.h"
 
 CPU::CPU(std::string bios_path) {
     bios = std::make_unique<Bios>(bios_path);
@@ -22,7 +23,7 @@ uint32_t CPU::load32(uint32_t addr) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    fmt::print("CPU: Reading from {:x}.\nPaddr: {:x}\n", addr, paddr);
+    LOG_DEBUG("CPU: Reading from {:x}.\nPaddr: {:x}\n", addr, paddr);
 
     if(paddr < 0x00800000) {
         // main memory
@@ -55,6 +56,7 @@ void CPU::decodeExecute(Instruction instruction) {
     {
     case 0x0f:
         // LUI
+        LOG_DEBUG("LUI: rt:{:x}, I {:x}\n", instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate() << 16;
             setR(instruction.getRT(), imm);
@@ -62,6 +64,7 @@ void CPU::decodeExecute(Instruction instruction) {
         break;
     case 0x0d:
         // ORI
+        LOG_DEBUG("ORI: rt:{:x}, I {:x}\n", instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate();
             const uint32_t rt_val = getR(instruction.getRS());
@@ -69,8 +72,8 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     default:
-        fmt::print("Unhandled instruction: {:x}, opcode:{:x}\n", instruction.whole, instruction.getOpcode());
-        throw;
+        LOG("Unhandled instruction: {:x}, opcode:{:x}\n", instruction.whole, instruction.getOpcode());
+        running = false;
         break;
     }
     pc+= 4;
