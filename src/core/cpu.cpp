@@ -6,6 +6,9 @@
 
 CPU::CPU(std::string bios_path) {
     bios = std::make_unique<Bios>(bios_path);
+
+    R.fill(0xdeadbeef);
+    R[0] = 0;
 }
 
 uint32_t CPU::load32(uint32_t addr) {
@@ -48,10 +51,31 @@ uint32_t CPU::load32(uint32_t addr) {
 }
 
 void CPU::decodeExecute(Instruction instruction) {
-    fmt::print("Unhandled instruction: {:x}\n", instruction.whole);
+    switch (instruction.getOpcode())
+    {
+    case 0x0f:
+        // LUI
+        {
+            const uint32_t imm = instruction.getImmediate() << 16;
+            setR(instruction.getRT(), imm);
+        }
+        break;
+    case 0x0d:
+        // ORI
+        {
+            const uint32_t imm = instruction.getImmediate();
+            const uint32_t rt_val = getR(instruction.getRS());
+            setR(instruction.getRT(), imm | rt_val);
+        }
+        break;
+    default:
+        fmt::print("Unhandled instruction: {:x}, opcode:{:x}\n", instruction.whole, instruction.getOpcode());
+        throw;
+        break;
+    }
+    pc+= 4;
 }
 
 void CPU::mainLoop() {
     decodeExecute(load32(pc));
-    pc+= 4;
 }
