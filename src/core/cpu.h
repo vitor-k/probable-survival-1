@@ -12,6 +12,16 @@
 constexpr uint32_t memory_size = 2 * 1024 * 1024;
 constexpr uint32_t bios_addr = 0xbfc00000;
 
+enum class MemMap {
+    Main,
+    Expansion1,
+    Scratchpad,
+    HardwareRegs,
+    BIOS,
+    IO,
+    Unmapped
+};
+
 class CPU {
 public:
     CPU(std::string bios_path);
@@ -109,7 +119,9 @@ public:
     void mainLoop();
 
 private:
+    MemMap decodeAddr(uint32_t addr);
     uint32_t load32(uint32_t addr);
+    void store32(uint32_t addr, uint32_t val);
     constexpr void setR(uint32_t i, uint32_t val) {
         if(i)
             R[i] = val;
