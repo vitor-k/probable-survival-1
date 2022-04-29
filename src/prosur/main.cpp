@@ -12,6 +12,8 @@
 #include <fmt/core.h>
 #include <fmt/os.h>
 
+#include <memory>
+
 #include "core/cpu.h"
 
 #ifdef _WIN32
@@ -88,7 +90,7 @@ int main(int argc, char* args[]) {
 
     fmt::print("Provided filename is {}\n", filename);
 
-    CPU* cpu = new CPU(filename);
+    std::unique_ptr<CPU> cpu = std::make_unique<CPU>(filename);
 
     while(cpu->running){
         cpu->mainLoop();
