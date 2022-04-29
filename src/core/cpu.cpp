@@ -53,6 +53,12 @@ MemMap CPU::decodeAddr(uint32_t paddr) {
 }
 
 uint32_t CPU::load32(uint32_t addr) {
+    if(addr % 4 != 0) {
+        LOG("Unaligned memory read at {:x}\n", addr);
+        running = false;
+        return 0;
+    }
+
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
@@ -77,6 +83,12 @@ uint32_t CPU::load32(uint32_t addr) {
 }
 
 void CPU::store32(uint32_t addr, uint32_t val) {
+    if(addr % 4 != 0) {
+        LOG("Unaligned memory store at {:x}\n", addr);
+        running = false;
+        return;
+    }
+
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
