@@ -5,6 +5,9 @@
 #include "mips.h"
 #include "log.h"
 
+// Must be included after "cpu.h"
+#include <fmt/ostream.h>
+
 namespace {
     constexpr uint32_t REGION_MASKS[] = {
     0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, // The mask for KUSEG (2GB)
@@ -76,7 +79,7 @@ uint32_t CPU::load32(uint32_t addr) {
     case MemMap::Unmapped:
         // fallthrough
     default:
-        LOG("Unhandled memory read at {:x}", addr);
+        LOG("Unhandled memory read at {:x}, decoded as {}\n", addr, decodeAddr(paddr));
         running = false;
         break;
     }
@@ -109,7 +112,7 @@ void CPU::store32(uint32_t addr, uint32_t val) {
         LOG("Can't write to bios!\n");
         break;
     default:
-        LOG("Unhandled memory story at {:x}\n", addr);
+        LOG("Unhandled memory store at {:x}, decoded as: {}\n", addr, decodeAddr(paddr));
         running = false;
         break;
     }

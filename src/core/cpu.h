@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <ostream>
 
 #include "bios.h"
 #include "mips.h"
@@ -21,6 +22,34 @@ enum class MemMap {
     IO,
     Unmapped
 };
+
+inline std::ostream &operator<<(std::ostream& os, MemMap map) {
+    std::string mapname;
+    switch(map) {
+        case MemMap::Main:
+            mapname = "Main";
+            break;
+        case MemMap::Expansion1:
+            mapname = "Expansion1";
+            break;
+        case MemMap::Scratchpad:
+            mapname = "Scratchpad";
+            break;
+        case MemMap::HardwareRegs:
+            mapname = "HardwareRegs";
+            break;
+        case MemMap::BIOS:
+            mapname = "BIOS";
+            break;
+        case MemMap::IO:
+            mapname = "IO";
+            break;
+        case MemMap::Unmapped:
+            mapname = "Unmapped";
+            break;
+    }
+    return os << mapname;
+}
 
 class CPU {
 public:
