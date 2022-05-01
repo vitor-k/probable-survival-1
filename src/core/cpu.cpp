@@ -124,6 +124,19 @@ void CPU::store32(uint32_t addr, uint32_t val) {
 void CPU::decodeExecute(Instruction instruction) {
     switch (instruction.getOpcode())
     {
+    case 0x00:
+        // SPECIAL
+        switch(instruction.getFunct()) {
+            case 0x0:
+                // SLL Shift Logical Left
+                LOG_DEBUG("SLL: rt:{:x}, rd:{:x}, sa:{:x}\n", instruction.getRT(), instruction.getRD(), instruction.getShamt());
+                setR(instruction.getRD(), getR(instruction.getRT()) << instruction.getShamt());
+                break;
+            default:
+                LOG("Unhandled instruction: {:x}, opcode: SPECIAL, func: {:x}\n", instruction.whole, instruction.getFunct());
+                running = false;
+        }
+        break;
     case 0x0f:
         // LUI
         LOG_DEBUG("LUI: rt:{:x}, I {:x}\n", instruction.getRT(), instruction.getImmediate());
