@@ -69,13 +69,12 @@ uint32_t CPU::load32(uint32_t addr) {
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
-        /* code */
     {
-        const uint32_t offset = paddr & 0x1fffff;
+        const uint32_t offset = paddr & 0x1ffffc;
         return build32(memory[offset], memory[offset + 1], memory[offset + 2], memory[offset + 3]);
     }
     case MemMap::BIOS:
-        return bios->load32(paddr & 0x7ffff);
+        return bios->load32(paddr & 0x7fffc);
     case MemMap::Unmapped:
         // fallthrough
     default:
@@ -101,7 +100,7 @@ void CPU::store32(uint32_t addr, uint32_t val) {
     case MemMap::Main:
         /* code */
     {
-        const uint32_t offset = paddr & 0x1fffff;
+        const uint32_t offset = paddr & 0x1ffffc;
         memory[offset] = getFirstByte(val);
         memory[offset+1] = getSecondByte(val);
         memory[offset+2] = getThirdByte(val);
