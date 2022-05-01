@@ -30,35 +30,44 @@ struct Instruction {
         whole = a;
     }
 
-    constexpr uint32_t getOpcode(){
-        return (whole >> 26) & 0b111111;
+    template<int N, int M>
+    constexpr uint32_t getBits() const{
+        return (whole >> (N)) & ((1<<M)-1);
     }
-    constexpr uint32_t getRS(){
-        return (whole >> 21) & 0b11111;
+
+    constexpr uint8_t getOpcode() const{
+        return getBits<26,6>();
     }
-    constexpr uint32_t getBase(){
+    constexpr uint8_t getRS() const{
+        return getBits<21,5>();
+    }
+    constexpr uint8_t getBase() const{
         return getRS();
     }
-    constexpr uint32_t getRT(){
-        return (whole >> 16) & 0b11111;
+    constexpr uint8_t getRT() const{
+        return getBits<16,5>();
     }
-    constexpr uint32_t getRD(){
-        return (whole >> 11) & 0b11111;
+    constexpr uint8_t getRD() const{
+        return getBits<11,5>();
     }
-    constexpr uint32_t getShamt(){
-        return (whole >> 6) & 0b11111;
+    constexpr uint8_t getShamt() const{
+        return getBits<6,5>();
     }
-    constexpr uint32_t getFunct(){
-        return whole & 0b111111;
+    constexpr uint8_t getFunct() const{
+        return getBits<0,6>();
     }
-    constexpr uint32_t getImmediate(){
-        return whole & 0xffff;
+    constexpr uint16_t getImmediate() const{
+        return getBits<0,16>();
     }
-    constexpr uint32_t getOffset(){
-        return getImmediate();
+    constexpr int16_t getOffset() const{
+        union _imm {
+            uint16_t u;
+            int16_t i;
+        };
+        return _imm{getImmediate()}.i;
     }
-    constexpr uint32_t getAddress(){
-        return whole & 0x3ffffff;
+    constexpr uint32_t getAddress() const{
+        return getBits<0,26>();
     }
 };
 

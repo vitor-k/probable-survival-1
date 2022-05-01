@@ -145,7 +145,7 @@ void CPU::decodeExecute(Instruction instruction) {
         // SW
         LOG_DEBUG("SW: base:{:x}, rt:{:x}, I {:x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
-            const uint32_t offset = instruction.getOffset();
+            const int32_t offset = instruction.getOffset();
             const uint32_t rt_val = getR(instruction.getRS());
             const uint32_t base_addr = getR(instruction.getBase());
             store32(base_addr + offset, rt_val);
