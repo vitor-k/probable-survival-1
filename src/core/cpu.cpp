@@ -137,6 +137,11 @@ void CPU::decodeExecute(Instruction instruction) {
                 running = false;
         }
         break;
+    case 0x09:
+        // ADDIU Add Immediate Unsigned Word
+        LOG_DEBUG("ADDIU: rt:{:x}, rs:{:x}, I {:x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
+        setR(instruction.getRT(), getR(instruction.getRS()) + instruction.getImmediate());
+        break;
     case 0x0f:
         // LUI
         LOG_DEBUG("LUI: rt:{:x}, I {:x}\n", instruction.getRT(), instruction.getImmediate());
