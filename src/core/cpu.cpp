@@ -108,6 +108,9 @@ void CPU::store32(uint32_t addr, uint32_t val) {
         memory[offset+3] = getFourthByte(val);
     }
         break;
+    case MemMap::HardwareRegs:
+        LOG("Ignoring writes to hardware regs for now.\n");
+        break;
     case MemMap::BIOS:
         LOG("Can't write to bios!\n");
         break;
