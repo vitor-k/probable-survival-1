@@ -132,9 +132,23 @@ void CPU::decodeExecute(Instruction instruction) {
                 LOG_DEBUG("SLL: rt:{:x}, rd:{:x}, sa:{:x}\n", instruction.getRT(), instruction.getRD(), instruction.getShamt());
                 setR(instruction.getRD(), getR(instruction.getRT()) << instruction.getShamt());
                 break;
+            case 0x25:
+                // OR
+                LOG_DEBUG("OR: rs:{:x}, rt:{:x}, rd:{:x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
+                setR(instruction.getRD(), getR(instruction.getRS()) | getR(instruction.getRT()));
+                break;
             default:
                 LOG("Unhandled instruction: {:x}, opcode: SPECIAL, func: {:x}\n", instruction.whole, instruction.getFunct());
                 running = false;
+        }
+        break;
+    case 0x02:
+        // J Jump
+        LOG_DEBUG("J: addr:{:x}\n", instruction.getAddress());
+        {
+            const auto addr = instruction.getAddress() << 2;
+            const uint32_t mask = 0xf0000000;
+            pc = (pc & mask) | addr;
         }
         break;
     case 0x09:
@@ -174,9 +188,13 @@ void CPU::decodeExecute(Instruction instruction) {
         running = false;
         break;
     }
-    pc+= 4;
 }
 
 void CPU::mainLoop() {
-    decodeExecute(load32(pc));
+    auto current_instruction = next_instruction;
+    next_instruction = load32(pc);
+
+    pc += 4;
+
+    decodeExecute(current_instruction);
 }

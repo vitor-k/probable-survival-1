@@ -143,6 +143,7 @@ private:
 
     std::unique_ptr<Bios> bios;
 
+    Instruction next_instruction{0}; // Due to branch delay slots
 public:
     void decodeExecute(Instruction instruction);
     void mainLoop();
@@ -155,7 +156,7 @@ private:
         if(i)
             R[i] = val;
     }
-    constexpr uint32_t getR(uint32_t i) {
+    constexpr uint32_t getR(uint32_t i) const {
         if(i)
             return R[i];
         return 0;
