@@ -152,11 +152,11 @@ private:
     MemMap decodeAddr(uint32_t addr);
     uint32_t load32(uint32_t addr);
     void store32(uint32_t addr, uint32_t val);
-    constexpr void setR(uint32_t i, uint32_t val) {
+    constexpr void setR(uint8_t i, uint32_t val) {
         if(i)
             R[i] = val;
     }
-    constexpr uint32_t getR(uint32_t i) const {
+    constexpr uint32_t getR(uint8_t i) const {
         if(i)
             return R[i];
         return 0;
