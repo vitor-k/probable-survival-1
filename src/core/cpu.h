@@ -67,6 +67,16 @@ private:
 
     std::array<uint32_t, 32> R;
 
+    // Duplicate registers to emulate the load delay slot
+    // TODO: possibly emulate the delay slot by separating
+    // the decoding and executing step, with the decoding step
+    // returning a struct with the necessary arguments and 
+    // the decoded function, and then the execute step would
+    // execute pending loads and call the decoded function.
+    std::array<uint32_t, 32> outR;
+
+    std::pair<uint8_t, uint32_t> load{0,0};
+
     uint32_t hi;
     uint32_t lo;
 
@@ -156,7 +166,7 @@ private:
     void store32(uint32_t addr, uint32_t val);
     constexpr void setR(uint8_t i, uint32_t val) {
         if(i)
-            R[i] = val;
+            outR[i] = val;
     }
     constexpr uint32_t getR(uint8_t i) const {
         if(i)

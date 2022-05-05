@@ -1,5 +1,6 @@
 
 #include <fmt/core.h>
+#include <algorithm>
 #include <limits>
 
 #include "cpu.h"
@@ -215,6 +216,22 @@ void CPU::decodeExecute(Instruction instruction) {
             }
         }
         break;
+    case 0x23:
+        // LW
+        LOG_DEBUG("LW: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
+        {
+            if(Cop0R[12] & 0x10000) {
+                LOG_DEBUG("Ignoring loads from isolated cache\n");
+                break;
+            }
+            const int32_t offset = instruction.getOffset();
+            const uint32_t rt_val = getR(instruction.getRT());
+            const uint32_t base_addr = getR(instruction.getBase());
+
+            load = {rt_val, load32(base_addr + offset)};
+        }
+
+        break;
     case 0x2b:
         // SW
         LOG_DEBUG("SW: base:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
@@ -242,5 +259,9 @@ void CPU::mainLoop() {
 
     pc += 4;
 
+    setR(load.first, load.second);
+    load = {0,0};
+
     decodeExecute(current_instruction);
+    std::copy(outR.begin(), outR.end(), R.begin());
 }
