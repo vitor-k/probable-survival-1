@@ -44,6 +44,9 @@ struct Instruction {
     constexpr uint8_t getBase() const{
         return getRS();
     }
+    constexpr uint8_t getCopOpcode() const{
+        return getRS();
+    }
     constexpr uint8_t getRT() const{
         return getBits<16,5>();
     }

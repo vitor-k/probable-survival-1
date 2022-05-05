@@ -138,6 +138,8 @@ private:
     uint32_t& s8 = R[30];
     uint32_t& ra = R[31];
 
+    // Cop0 Registers
+    std::array<uint32_t, 16> Cop0R{0};
 
     uint8_t memory[memory_size]{0};
 

@@ -175,10 +175,28 @@ void CPU::decodeExecute(Instruction instruction) {
             setR(instruction.getRT(), imm | rt_val);
         }
         break;
+    case 0x10:
+        {
+            switch(instruction.getCopOpcode()) {
+                case 0x4:
+                    LOG_DEBUG("MTC0: rt:{:x}, rd:{:x}\n", instruction.getRT(), instruction.getRD());
+                    Cop0R[instruction.getRD()] = getR(instruction.getRT());
+                    break;
+                default:
+                    LOG("Unhandled instruction: {:x}, opcode:{:x}, copopcode:{:x}\n", instruction.whole, instruction.getOpcode(), instruction.getCopOpcode());
+                    running = false;
+                    break;
+            }
+        }
+        break;
     case 0x2b:
         // SW
         LOG_DEBUG("SW: base:{:x}, rt:{:x}, I {:x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
+            if(Cop0R[12] & 0x10000) {
+                LOG_DEBUG("Ignoring writes to isolated cache\n");
+                break;
+            }
             const int32_t offset = instruction.getOffset();
             const uint32_t rt_val = getR(instruction.getRS());
             const uint32_t base_addr = getR(instruction.getBase());
