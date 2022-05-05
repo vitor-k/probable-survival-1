@@ -57,7 +57,7 @@ MemMap CPU::decodeAddr(uint32_t paddr) {
 
 uint32_t CPU::load32(uint32_t addr) {
     if(addr % 4 != 0) {
-        LOG("Unaligned memory read at {:x}\n", addr);
+        LOG("Unaligned memory read at {:#x}\n", addr);
         running = false;
         return 0;
     }
@@ -65,7 +65,7 @@ uint32_t CPU::load32(uint32_t addr) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    LOG_DEBUG("CPU: Reading from {:x}.\nPaddr: {:x}\n", addr, paddr);
+    LOG_DEBUG("CPU: Reading from {:#x}.\nPaddr: {:#x}\n", addr, paddr);
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
@@ -78,7 +78,7 @@ uint32_t CPU::load32(uint32_t addr) {
     case MemMap::Unmapped:
         // fallthrough
     default:
-        LOG("Unhandled memory read at {:x}, decoded as {}\n", addr, decodeAddr(paddr));
+        LOG("Unhandled memory read at {:#x}, decoded as {}\n", addr, decodeAddr(paddr));
         running = false;
         break;
     }
@@ -86,7 +86,7 @@ uint32_t CPU::load32(uint32_t addr) {
 
 void CPU::store32(uint32_t addr, uint32_t val) {
     if(addr % 4 != 0) {
-        LOG("Unaligned memory store at {:x}\n", addr);
+        LOG("Unaligned memory store at {:#x}\n", addr);
         running = false;
         return;
     }
@@ -94,7 +94,7 @@ void CPU::store32(uint32_t addr, uint32_t val) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    LOG_DEBUG("CPU: Storing {:x} to {:x}.\nPaddr: {:x}\n", val, addr, paddr);
+    LOG_DEBUG("CPU: Storing {:#x} to {:#x}.\nPaddr: {:#x}\n", val, addr, paddr);
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
@@ -117,7 +117,7 @@ void CPU::store32(uint32_t addr, uint32_t val) {
         LOG("Ignoring writes to IO for now.\n");
         break;
     default:
-        LOG("Unhandled memory store at {:x}, decoded as: {}\n", addr, decodeAddr(paddr));
+        LOG("Unhandled memory store at {:#x}, decoded as: {}\n", addr, decodeAddr(paddr));
         running = false;
         break;
     }
@@ -131,22 +131,22 @@ void CPU::decodeExecute(Instruction instruction) {
         switch(instruction.getFunct()) {
             case 0x0:
                 // SLL Shift Logical Left
-                LOG_DEBUG("SLL: rt:{:x}, rd:{:x}, sa:{:x}\n", instruction.getRT(), instruction.getRD(), instruction.getShamt());
+                LOG_DEBUG("SLL: rt:{:#x}, rd:{:#x}, sa:{:#x}\n", instruction.getRT(), instruction.getRD(), instruction.getShamt());
                 setR(instruction.getRD(), getR(instruction.getRT()) << instruction.getShamt());
                 break;
             case 0x25:
                 // OR
-                LOG_DEBUG("OR: rs:{:x}, rt:{:x}, rd:{:x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
+                LOG_DEBUG("OR: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
                 setR(instruction.getRD(), getR(instruction.getRS()) | getR(instruction.getRT()));
                 break;
             default:
-                LOG("Unhandled instruction: {:x}, opcode: SPECIAL, func: {:x}\n", instruction.whole, instruction.getFunct());
+                LOG("Unhandled instruction: {:#x}, opcode: SPECIAL, func: {:#x}\n", instruction.whole, instruction.getFunct());
                 running = false;
         }
         break;
     case 0x02:
         // J Jump
-        LOG_DEBUG("J: addr:{:x}\n", instruction.getAddress());
+        LOG_DEBUG("J: addr:{:#x}\n", instruction.getAddress());
         {
             const auto addr = instruction.getAddress() << 2;
             const uint32_t mask = 0xf0000000;
@@ -155,12 +155,12 @@ void CPU::decodeExecute(Instruction instruction) {
         break;
     case 0x09:
         // ADDIU Add Immediate Unsigned Word
-        LOG_DEBUG("ADDIU: rt:{:x}, rs:{:x}, I {:x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
+        LOG_DEBUG("ADDIU: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
         setR(instruction.getRT(), getR(instruction.getRS()) + instruction.getImmediate());
         break;
     case 0x0f:
         // LUI
-        LOG_DEBUG("LUI: rt:{:x}, I {:x}\n", instruction.getRT(), instruction.getImmediate());
+        LOG_DEBUG("LUI: rt:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate() << 16;
             setR(instruction.getRT(), imm);
@@ -168,7 +168,7 @@ void CPU::decodeExecute(Instruction instruction) {
         break;
     case 0x0d:
         // ORI
-        LOG_DEBUG("ORI: rs:{:x}, rt:{:x}, I {:x}\n", instruction.getRS(), instruction.getRT(), instruction.getImmediate());
+        LOG_DEBUG("ORI: rs:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate();
             const uint32_t rt_val = getR(instruction.getRS());
@@ -179,11 +179,11 @@ void CPU::decodeExecute(Instruction instruction) {
         {
             switch(instruction.getCopOpcode()) {
                 case 0x4:
-                    LOG_DEBUG("MTC0: rt:{:x}, rd:{:x}\n", instruction.getRT(), instruction.getRD());
+                    LOG_DEBUG("MTC0: rt:{:#x}, rd:{:#x}\n", instruction.getRT(), instruction.getRD());
                     Cop0R[instruction.getRD()] = getR(instruction.getRT());
                     break;
                 default:
-                    LOG("Unhandled instruction: {:x}, opcode:{:x}, copopcode:{:x}\n", instruction.whole, instruction.getOpcode(), instruction.getCopOpcode());
+                    LOG("Unhandled instruction: {:#x}, opcode:{:#x}, copopcode:{:#x}\n", instruction.whole, instruction.getOpcode(), instruction.getCopOpcode());
                     running = false;
                     break;
             }
@@ -191,7 +191,7 @@ void CPU::decodeExecute(Instruction instruction) {
         break;
     case 0x2b:
         // SW
-        LOG_DEBUG("SW: base:{:x}, rt:{:x}, I {:x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
+        LOG_DEBUG("SW: base:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
             if(Cop0R[12] & 0x10000) {
                 LOG_DEBUG("Ignoring writes to isolated cache\n");
@@ -204,7 +204,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     default:
-        LOG("Unhandled instruction: {:x}, opcode:{:x}\n", instruction.whole, instruction.getOpcode());
+        LOG("Unhandled instruction: {:#x}, opcode:{:#x}\n", instruction.whole, instruction.getOpcode());
         running = false;
         break;
     }

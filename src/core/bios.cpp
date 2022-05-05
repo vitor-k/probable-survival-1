@@ -33,6 +33,6 @@ Bios::Bios(std::string filepath) {
 }
 
 uint32_t Bios::load32(uint32_t offset) {
-    LOG_DEBUG("BIOS: Fetching from {:x}\n", offset);
+    LOG_DEBUG("BIOS: Fetching from {:#x}\n", offset);
     return build32(memory[offset],memory[offset+1],memory[offset+2], memory[offset+3]);
 }
