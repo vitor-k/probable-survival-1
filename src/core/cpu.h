@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <ostream>
+#include <utility>
 
 #include "bios.h"
 #include "mips.h"

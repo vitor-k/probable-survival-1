@@ -234,14 +234,14 @@ void CPU::decodeExecute(Instruction instruction) {
         break;
     case 0x2b:
         // SW
-        LOG_DEBUG("SW: base:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
+        LOG_DEBUG("SW: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
             if(Cop0R[12] & 0x10000) {
                 LOG_DEBUG("Ignoring writes to isolated cache\n");
                 break;
             }
             const int32_t offset = instruction.getOffset();
-            const uint32_t rt_val = getR(instruction.getRS());
+            const uint32_t rt_val = getR(instruction.getRT());
             const uint32_t base_addr = getR(instruction.getBase());
             store32(base_addr + offset, rt_val);
         }
