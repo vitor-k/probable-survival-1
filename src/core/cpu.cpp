@@ -153,6 +153,14 @@ void CPU::decodeExecute(Instruction instruction) {
             pc = (pc & mask) | addr;
         }
         break;
+    case 0x05:
+        // BNE Branch Not Equal
+        LOG_DEBUG("BNE: rs:{:#x}, rt:{:#x}, offset:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getOffset());
+        if(getR(instruction.getRS()) != getR(instruction.getRT())){
+            const int32_t offset = instruction.getOffset();
+            pc = pc + (offset << 2) - 4;
+        }
+        break;
     case 0x09:
         // ADDIU Add Immediate Unsigned Word
         LOG_DEBUG("ADDIU: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
