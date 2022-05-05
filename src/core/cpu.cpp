@@ -113,6 +113,9 @@ void CPU::store32(uint32_t addr, uint32_t val) {
     case MemMap::BIOS:
         LOG("Can't write to bios!\n");
         break;
+    case MemMap::IO:
+        LOG("Ignoring writes to IO for now.\n");
+        break;
     default:
         LOG("Unhandled memory store at {:x}, decoded as: {}\n", addr, decodeAddr(paddr));
         running = false;
