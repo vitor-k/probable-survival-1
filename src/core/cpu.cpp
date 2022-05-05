@@ -1,5 +1,6 @@
 
 #include <fmt/core.h>
+#include <limits>
 
 #include "cpu.h"
 #include "mips.h"
@@ -159,6 +160,23 @@ void CPU::decodeExecute(Instruction instruction) {
         if(getR(instruction.getRS()) != getR(instruction.getRT())){
             const int32_t offset = instruction.getOffset();
             pc = pc + (offset << 2) - 4;
+        }
+        break;
+    case 0x08:
+        // ADDI Add Immediate Unsigned Word
+        LOG_DEBUG("ADDI: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
+        {
+            const int32_t operand1 = getR(instruction.getRS());
+            const int32_t operand2 = instruction.getImmediateS();
+            const int64_t sumE = static_cast<int64_t>(operand1) + static_cast<int64_t>(operand2);
+            if(sumE > std::numeric_limits<int32_t>::max() || sumE < std::numeric_limits<int32_t>::min()) {
+                // exception
+                LOG("ADDI Overflow! I need to implement exceptions!\n");
+                running = false;
+            }
+            else {
+                setR(instruction.getRT(), operand1 + operand2);
+            }
         }
         break;
     case 0x09:

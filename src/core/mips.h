@@ -62,12 +62,15 @@ struct Instruction {
     constexpr uint16_t getImmediate() const{
         return getBits<0,16>();
     }
-    constexpr int16_t getOffset() const{
+    constexpr int16_t getImmediateS() const{
         union _imm {
             uint16_t u;
             int16_t i;
         };
         return _imm{getImmediate()}.i;
+    }
+    constexpr int16_t getOffset() const{
+        return getImmediateS();
     }
     constexpr uint32_t getAddress() const{
         return getBits<0,26>();
