@@ -24,6 +24,88 @@ enum class MemMap {
     Unmapped
 };
 
+enum class RegAlias : uint8_t {
+    R0 = 0,
+    R1 = 1,
+    R2 = 2,
+    R3 = 3,
+    R4 = 4,
+    R5 = 5,
+    R6 = 6,
+    R7 = 7,
+    R8 = 8,
+    R9 = 9,
+    R10 = 10,
+    R11 = 11,
+    R12 = 12,
+    R13 = 13,
+    R14 = 14,
+    R15 = 15,
+    R16 = 16,
+    R17 = 17,
+    R18 = 18,
+    R19 = 19,
+    R20 = 20,
+    R21 = 21,
+    R22 = 22,
+    R23 = 23,
+    R24 = 24,
+    R25 = 25,
+    R26 = 26,
+    R27 = 27,
+    R28 = 28,
+    R29 = 29,
+    R30 = 30,
+    R31 = 31,
+    zero = 0,
+    at = 1,
+    v0 = 2,
+    v1 = 3,
+    a0 = 4,
+    a1 = 5,
+    a2 = 6,
+    a3 = 7,
+    t0 = 8,
+    t1 = 9,
+    t2 = 10,
+    t3 = 11,
+    t4 = 12,
+    t5 = 13,
+    t6 = 14,
+    t7 = 15,
+    s0 = 16,
+    s1 = 17,
+    s2 = 18,
+    s3 = 19,
+    s4 = 20,
+    s5 = 21,
+    s6 = 22,
+    s7 = 23,
+    t8 = 24,
+    t9 = 25,
+    k0 = 26,
+    k1 = 27,
+    gp = 28,
+    sp = 29,
+    fp = 30,
+    s8 = 30,
+    ra = 31,
+};
+
+enum class Cop0RegAlias : uint8_t {
+    BPC = 3,
+    BDA = 5,
+    JUMPDEST = 6,
+    DCIC = 7,
+    BadVaddr = 8,
+    BDAM = 9,
+    BPCM = 11,
+    SR = 12,
+    CAUSE = 13,
+    EPC = 14,
+    PRID = 15,
+};
+
 inline std::ostream &operator<<(std::ostream& os, MemMap map) {
     std::string mapname;
     switch(map) {
@@ -81,74 +163,6 @@ private:
     uint32_t hi;
     uint32_t lo;
 
-    // Register aliases
-    const uint32_t& R0 = R[0];
-    uint32_t& R1 = R[1];
-    uint32_t& R2 = R[2];
-    uint32_t& R3 = R[3];
-    uint32_t& R4 = R[4];
-    uint32_t& R5 = R[5];
-    uint32_t& R6 = R[6];
-    uint32_t& R7 = R[7];
-    uint32_t& R8 = R[8];
-    uint32_t& R9 = R[9];
-    uint32_t& R10 = R[10];
-    uint32_t& R11 = R[11];
-    uint32_t& R12 = R[12];
-    uint32_t& R13 = R[13];
-    uint32_t& R14 = R[14];
-    uint32_t& R15 = R[15];
-    uint32_t& R16 = R[16];
-    uint32_t& R17 = R[17];
-    uint32_t& R18 = R[18];
-    uint32_t& R19 = R[19];
-    uint32_t& R20 = R[20];
-    uint32_t& R21 = R[21];
-    uint32_t& R22 = R[22];
-    uint32_t& R23 = R[23];
-    uint32_t& R24 = R[24];
-    uint32_t& R25 = R[25];
-    uint32_t& R26 = R[26];
-    uint32_t& R27 = R[27];
-    uint32_t& R28 = R[28];
-    uint32_t& R29 = R[29];
-    uint32_t& R30 = R[30];
-    uint32_t& R31 = R[31];
-
-    const uint32_t& zero = R[0];
-    uint32_t& at = R[1];
-    uint32_t& v0 = R[2];
-    uint32_t& v1 = R[3];
-    uint32_t& a0 = R[4];
-    uint32_t& a1 = R[5];
-    uint32_t& a2 = R[6];
-    uint32_t& a3 = R[7];
-    uint32_t& t0 = R[8];
-    uint32_t& t1 = R[9];
-    uint32_t& t2 = R[10];
-    uint32_t& t3 = R[11];
-    uint32_t& t4 = R[12];
-    uint32_t& t5 = R[13];
-    uint32_t& t6 = R[14];
-    uint32_t& t7 = R[15];
-    uint32_t& s0 = R[16];
-    uint32_t& s1 = R[17];
-    uint32_t& s2 = R[18];
-    uint32_t& s3 = R[19];
-    uint32_t& s4 = R[20];
-    uint32_t& s5 = R[21];
-    uint32_t& s6 = R[22];
-    uint32_t& s7 = R[23];
-    uint32_t& t8 = R[24];
-    uint32_t& t9 = R[25];
-    uint32_t& k0 = R[26];
-    uint32_t& k1 = R[27];
-    uint32_t& gp = R[28];
-    uint32_t& sp = R[29];
-    uint32_t& fp = R[30];
-    uint32_t& s8 = R[30];
-    uint32_t& ra = R[31];
-
     // Cop0 Registers
     std::array<uint32_t, 16> Cop0R{0};
 
@@ -173,6 +187,27 @@ private:
         if(i)
             return R[i];
         return 0;
+    }
+    // RegAlias overloads
+    constexpr void setR(RegAlias i, uint32_t val) {
+        setR(static_cast<uint8_t>(i), val);
+    }
+    constexpr uint32_t getR(RegAlias i) const {
+        return getR(static_cast<uint8_t>(i));
+    }
+
+    constexpr void setCop0R(uint8_t i, uint32_t val) {
+        Cop0R[i] = val;
+    }
+    constexpr uint32_t getCop0R(uint8_t i) const {
+        return Cop0R[i];
+    }
+    // Cop0RegAlias overloads
+    constexpr void setCop0R(Cop0RegAlias i, uint32_t val) {
+        setCop0R(static_cast<uint8_t>(i),val);
+    }
+    constexpr uint32_t getCop0R(Cop0RegAlias i) const {
+        return getCop0R(static_cast<uint8_t>(i));
     }
 };
 

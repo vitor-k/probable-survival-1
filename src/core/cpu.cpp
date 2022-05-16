@@ -220,7 +220,7 @@ void CPU::decodeExecute(Instruction instruction) {
         // LW
         LOG_DEBUG("LW: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
-            if(Cop0R[12] & 0x10000) {
+            if(getCop0R(Cop0RegAlias::SR) & 0x10000) {
                 LOG_DEBUG("Ignoring loads from isolated cache\n");
                 break;
             }
@@ -236,7 +236,7 @@ void CPU::decodeExecute(Instruction instruction) {
         // SW
         LOG_DEBUG("SW: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
-            if(Cop0R[12] & 0x10000) {
+            if(getCop0R(Cop0RegAlias::SR) & 0x10000) {
                 LOG_DEBUG("Ignoring writes to isolated cache\n");
                 break;
             }
