@@ -1,5 +1,7 @@
 
 #include <fmt/core.h>
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <algorithm>
 #include <limits>
 
@@ -7,8 +9,7 @@
 #include "mips.h"
 #include "log.h"
 
-// Must be included after "cpu.h"
-#include <fmt/ostream.h>
+template <> struct fmt::formatter<MemMap> : ostream_formatter {};
 
 namespace {
     constexpr uint32_t REGION_MASKS[] = {
