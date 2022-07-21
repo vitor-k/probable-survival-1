@@ -87,6 +87,45 @@ uint32_t CPU::load32(uint32_t addr) {
     }
 }
 
+// There is duplicate code from the store32 function, maybe the RAM writes should be abstracted away
+// and merge the functions with overloading/templates
+void CPU::store16(uint32_t addr, uint16_t val) {
+    if(addr % 2 != 0) {
+        LOG("Unaligned halfword store at {:#x}\n", addr);
+        running = false;
+        return;
+    }
+
+    const uint8_t region_bits = addr >> 29;
+    const uint32_t paddr = addr & REGION_MASKS[region_bits];
+
+    LOG_DEBUG("CPU: Storing halfword {:#x} to {:#x}.\nPaddr: {:#x}\n", val, addr, paddr);
+
+    switch (decodeAddr(paddr)) {
+    case MemMap::Main:
+    {
+        LOG("Ignoring halfword writes to memory for now.\n");
+        const uint32_t offset = paddr & 0x1ffffc;
+        //memory[offset] = getFirstByte(val);
+        //memory[offset+1] = getSecondByte(val);
+    }
+        break;
+    case MemMap::HardwareRegs:
+        LOG("Ignoring halfword writes to hardware regs for now.\n");
+        break;
+    case MemMap::BIOS:
+        LOG("Can't write to bios!\n");
+        break;
+    case MemMap::IO:
+        LOG("Ignoring halfword writes to IO for now.\n");
+        break;
+    default:
+        LOG("Unhandled halfword store at {:#x}, decoded as: {}\n", addr, decodeAddr(paddr));
+        running = false;
+        break;
+    }
+}
+
 void CPU::store32(uint32_t addr, uint32_t val) {
     if(addr % 4 != 0) {
         LOG("Unaligned memory store at {:#x}\n", addr);
@@ -242,6 +281,20 @@ void CPU::decodeExecute(Instruction instruction) {
             load = {rt_val, load32(base_addr + offset)};
         }
 
+        break;
+    case 0x29:
+        // SH - Store Halfword
+        LOG_DEBUG("SH: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
+        {
+            if(getCop0R(Cop0RegAlias::SR) & 0x10000) {
+                LOG_DEBUG("Ignoring writes to isolated cache\n");
+                break;
+            }
+            const int32_t offset = instruction.getOffset();
+            const uint16_t rt_val = getR(instruction.getRT());
+            const uint32_t base_addr = getR(instruction.getBase());
+            store16(base_addr + offset, rt_val);
+        }
         break;
     case 0x2b:
         // SW

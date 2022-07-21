@@ -178,6 +178,7 @@ public:
 private:
     MemMap decodeAddr(uint32_t addr);
     uint32_t load32(uint32_t addr);
+    void store16(uint32_t addr, uint16_t val);
     void store32(uint32_t addr, uint32_t val);
     constexpr void setR(uint8_t i, uint32_t val) {
         if(i)
