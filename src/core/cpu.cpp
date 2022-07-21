@@ -142,6 +142,16 @@ void CPU::decodeExecute(Instruction instruction) {
                 LOG_DEBUG("OR: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
                 setR(instruction.getRD(), getR(instruction.getRS()) | getR(instruction.getRT()));
                 break;
+            case 0x21:
+                // ADDU
+                LOG_DEBUG("ADDU: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
+                setR(instruction.getRD(), getR(instruction.getRS()) + getR(instruction.getRT()));
+                break;
+            case 0x2b:
+                // SLTU
+                LOG_DEBUG("SLTU: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
+                setR(instruction.getRD(), getR(instruction.getRS()) < getR(instruction.getRT()));
+                break;
             default:
                 LOG("Unhandled instruction: {:#x}, opcode: SPECIAL, func: {:#x}\n", instruction.whole, instruction.getFunct());
                 running = false;
@@ -165,7 +175,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x08:
-        // ADDI Add Immediate Unsigned Word
+        // ADDI Add Immediate Word
         LOG_DEBUG("ADDI: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
         {
             const int32_t operand1 = getR(instruction.getRS());
