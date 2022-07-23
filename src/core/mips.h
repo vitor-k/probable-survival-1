@@ -27,6 +27,10 @@ constexpr uint8_t getSecondByte(uint16_t whole) {
     return (whole >> 8) & 0xff;
 }
 
+constexpr uint8_t getFirstByte(uint8_t whole) {
+    return whole;
+}
+
 struct Instruction {
     uint32_t whole{0};
 

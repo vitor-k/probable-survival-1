@@ -87,6 +87,37 @@ uint32_t CPU::load32(uint32_t addr) {
     }
 }
 
+// Vide comment on store16
+void CPU::store8(uint32_t addr, uint8_t val) {
+    const uint8_t region_bits = addr >> 29;
+    const uint32_t paddr = addr & REGION_MASKS[region_bits];
+
+    LOG_DEBUG("CPU: Storing byte {:#x} to {:#x}.\nPaddr: {:#x}\n", val, addr, paddr);
+
+    switch (decodeAddr(paddr)) {
+    case MemMap::Main:
+    {
+        LOG("Ignoring byte writes to memory for now.\n");
+        const uint32_t offset = paddr & 0x1ffffc;
+        //memory[offset] = getFirstByte(val);
+    }
+        break;
+    case MemMap::HardwareRegs:
+        LOG("Ignoring byte writes to hardware regs for now.\n");
+        break;
+    case MemMap::BIOS:
+        LOG("Can't write to bios!\n");
+        break;
+    case MemMap::IO:
+        LOG("Ignoring byte writes to IO for now.\n");
+        break;
+    default:
+        LOG("Unhandled byte store at {:#x}, decoded as: {}\n", addr, decodeAddr(paddr));
+        running = false;
+        break;
+    }
+}
+
 // There is duplicate code from the store32 function, maybe the RAM writes should be abstracted away
 // and merge the functions with overloading/templates
 void CPU::store16(uint32_t addr, uint16_t val) {
@@ -299,7 +330,20 @@ void CPU::decodeExecute(Instruction instruction) {
 
             load = {rt_val, load32(base_addr + offset)};
         }
-
+        break;
+    case 0x28:
+        // SB - Store Byte
+        LOG_DEBUG("SB: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
+        {
+            if(getCop0R(Cop0RegAlias::SR) & 0x10000) {
+                LOG_DEBUG("Ignoring writes to isolated cache\n");
+                break;
+            }
+            const int32_t offset = instruction.getOffset();
+            const uint8_t rt_val = getR(instruction.getRT());
+            const uint32_t base_addr = getR(instruction.getBase());
+            store8(base_addr + offset, rt_val);
+        }
         break;
     case 0x29:
         // SH - Store Halfword
