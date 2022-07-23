@@ -205,6 +205,16 @@ void CPU::decodeExecute(Instruction instruction) {
             pc = (pc & mask) | addr;
         }
         break;
+    case 0x03:
+        // JAL Jump And Link
+        LOG_DEBUG("JAL: addr:{:#x}\n", instruction.getAddress());
+        {
+            const auto addr = instruction.getAddress() << 2;
+            const uint32_t mask = 0xf0000000;
+            setR(RegAlias::ra, pc);
+            pc = (pc & mask) | addr;
+        }
+        break;
     case 0x05:
         // BNE Branch Not Equal
         LOG_DEBUG("BNE: rs:{:#x}, rt:{:#x}, offset:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getOffset());
@@ -241,6 +251,15 @@ void CPU::decodeExecute(Instruction instruction) {
         {
             const uint32_t imm = instruction.getImmediate() << 16;
             setR(instruction.getRT(), imm);
+        }
+        break;
+    case 0x0c:
+        // ANDI And Immediate
+        LOG_DEBUG("ANDI: rs:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getImmediate());
+        {
+            const uint32_t imm = instruction.getImmediate();
+            const uint32_t rt_val = getR(instruction.getRS());
+            setR(instruction.getRT(), imm & rt_val);
         }
         break;
     case 0x0d:
