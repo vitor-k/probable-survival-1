@@ -207,6 +207,11 @@ void CPU::decodeExecute(Instruction instruction) {
                 LOG_DEBUG("SLL: rt:{:#x}, rd:{:#x}, sa:{:#x}\n", instruction.getRT(), instruction.getRD(), instruction.getShamt());
                 setR(instruction.getRD(), getR(instruction.getRT()) << instruction.getShamt());
                 break;
+            case 0x08:
+                // JR Jump Register
+                LOG_DEBUG("JR: rs:{:#x}, addr:{:#x}\n", instruction.getRS(), getR(instruction.getRS()));
+                pc = getR(instruction.getRS());
+                break;
             case 0x25:
                 // OR
                 LOG_DEBUG("OR: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
