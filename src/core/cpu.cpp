@@ -212,7 +212,7 @@ void CPU::decodeExecute(Instruction instruction) {
                 pc = getR(instruction.getRS());
                 break;
             case 0x25:
-                // OR
+                // OR - Bitwise OR
                 LOG_DEBUG("OR: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
                 setR(instruction.getRD(), getR(instruction.getRS()) | getR(instruction.getRT()));
                 break;
@@ -285,7 +285,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x0f:
-        // LUI
+        // LUI - Load Upper Immediate
         LOG_DEBUG("LUI: rt:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate() << 16;
@@ -302,7 +302,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x0d:
-        // ORI
+        // ORI - Bitwise OR Immediate
         LOG_DEBUG("ORI: rs:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate();
@@ -314,6 +314,7 @@ void CPU::decodeExecute(Instruction instruction) {
         {
             switch(instruction.getCopOpcode()) {
                 case 0x4:
+                    // MTC0 - Move To Coprocessor 0
                     LOG_DEBUG("MTC0: rt:{:#x}, rd:{:#x}\n", instruction.getRT(), instruction.getRD());
                     switch(static_cast<Cop0RegAlias>(instruction.getRD())){
                         case Cop0RegAlias::SR:
