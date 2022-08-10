@@ -278,7 +278,11 @@ void CPU::decodeExecute(Instruction instruction) {
     case 0x09:
         // ADDIU - Add Immediate Unsigned Word
         LOG_DEBUG("ADDIU: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
-        setR(instruction.getRT(), getR(instruction.getRS()) + instruction.getImmediate());
+        {
+            const int32_t operand1 = getR(instruction.getRS());
+            const int32_t operand2 = instruction.getImmediateS();
+            setR(instruction.getRT(), operand1 + operand2);
+        }
         break;
     case 0x0f:
         // LUI
