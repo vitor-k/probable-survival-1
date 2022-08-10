@@ -68,7 +68,7 @@ uint32_t CPU::load32(uint32_t addr) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    LOG_DEBUG("CPU: Reading from {:#x}.\nPaddr: {:#x}\n", addr, paddr);
+    LOG_DEBUG("CPU: Reading from {:#x}. Paddr: {:#x}\n", addr, paddr);
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
@@ -92,7 +92,7 @@ void CPU::store8(uint32_t addr, uint8_t val) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    LOG_DEBUG("CPU: Storing byte {:#x} to {:#x}.\nPaddr: {:#x}\n", val, addr, paddr);
+    LOG_DEBUG("CPU: Storing byte {:#x} to {:#x}. Paddr: {:#x}\n", val, addr, paddr);
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
@@ -130,7 +130,7 @@ void CPU::store16(uint32_t addr, uint16_t val) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    LOG_DEBUG("CPU: Storing halfword {:#x} to {:#x}.\nPaddr: {:#x}\n", val, addr, paddr);
+    LOG_DEBUG("CPU: Storing halfword {:#x} to {:#x}. Paddr: {:#x}\n", val, addr, paddr);
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
@@ -167,11 +167,10 @@ void CPU::store32(uint32_t addr, uint32_t val) {
     const uint8_t region_bits = addr >> 29;
     const uint32_t paddr = addr & REGION_MASKS[region_bits];
 
-    LOG_DEBUG("CPU: Storing {:#x} to {:#x}.\nPaddr: {:#x}\n", val, addr, paddr);
+    LOG_DEBUG("CPU: Storing {:#x} to {:#x}. Paddr: {:#x}\n", val, addr, paddr);
 
     switch (decodeAddr(paddr)) {
     case MemMap::Main:
-        /* code */
     {
         const uint32_t offset = paddr & 0x1ffffc;
         memory[offset] = getFirstByte(val);
@@ -203,13 +202,13 @@ void CPU::decodeExecute(Instruction instruction) {
         // SPECIAL
         switch(instruction.getFunct()) {
             case 0x0:
-                // SLL Shift Logical Left
+                // SLL - Shift Logical Left
                 LOG_DEBUG("SLL: rt:{:#x}, rd:{:#x}, sa:{:#x}\n", instruction.getRT(), instruction.getRD(), instruction.getShamt());
                 setR(instruction.getRD(), getR(instruction.getRT()) << instruction.getShamt());
                 break;
             case 0x08:
-                // JR Jump Register
-                LOG_DEBUG("JR: rs:{:#x}, addr:{:#x}\n", instruction.getRS(), getR(instruction.getRS()));
+                // JR - Jump Register
+                LOG_DEBUG("JR: rs:{:#x}, addr:{:#x}, curr_pc:{:#x}\n", instruction.getRS(), getR(instruction.getRS()), pc);
                 pc = getR(instruction.getRS());
                 break;
             case 0x25:
@@ -218,12 +217,12 @@ void CPU::decodeExecute(Instruction instruction) {
                 setR(instruction.getRD(), getR(instruction.getRS()) | getR(instruction.getRT()));
                 break;
             case 0x21:
-                // ADDU
+                // ADDU - Add Unsigned
                 LOG_DEBUG("ADDU: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
                 setR(instruction.getRD(), getR(instruction.getRS()) + getR(instruction.getRT()));
                 break;
             case 0x2b:
-                // SLTU
+                // SLTU - Set on Less Than Unsigned
                 LOG_DEBUG("SLTU: rs:{:#x}, rt:{:#x}, rd:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getRD());
                 setR(instruction.getRD(), getR(instruction.getRS()) < getR(instruction.getRT()));
                 break;
@@ -233,7 +232,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x02:
-        // J Jump
+        // J - Jump
         LOG_DEBUG("J: addr:{:#x}\n", instruction.getAddress());
         {
             const auto addr = instruction.getAddress() << 2;
@@ -242,8 +241,8 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x03:
-        // JAL Jump And Link
-        LOG_DEBUG("JAL: addr:{:#x}\n", instruction.getAddress());
+        // JAL - Jump And Link
+        LOG_DEBUG("JAL: addr:{:#x}, curr_pc:{:#x}\n", instruction.getAddress(), pc);
         {
             const auto addr = instruction.getAddress() << 2;
             const uint32_t mask = 0xf0000000;
@@ -252,7 +251,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x05:
-        // BNE Branch Not Equal
+        // BNE - Branch Not Equal
         LOG_DEBUG("BNE: rs:{:#x}, rt:{:#x}, offset:{:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getOffset());
         if(getR(instruction.getRS()) != getR(instruction.getRT())){
             const int32_t offset = instruction.getOffset();
@@ -260,7 +259,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x08:
-        // ADDI Add Immediate Word
+        // ADDI - Add Immediate Word
         LOG_DEBUG("ADDI: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
         {
             const int32_t operand1 = getR(instruction.getRS());
@@ -277,7 +276,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x09:
-        // ADDIU Add Immediate Unsigned Word
+        // ADDIU - Add Immediate Unsigned Word
         LOG_DEBUG("ADDIU: rt:{:#x}, rs:{:#x}, I {:#x}\n", instruction.getRT(), instruction.getRS(), instruction.getImmediate());
         setR(instruction.getRT(), getR(instruction.getRS()) + instruction.getImmediate());
         break;
@@ -290,7 +289,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x0c:
-        // ANDI And Immediate
+        // ANDI - And Immediate
         LOG_DEBUG("ANDI: rs:{:#x}, rt:{:#x}, I {:#x}\n", instruction.getRS(), instruction.getRT(), instruction.getImmediate());
         {
             const uint32_t imm = instruction.getImmediate();
@@ -312,7 +311,14 @@ void CPU::decodeExecute(Instruction instruction) {
             switch(instruction.getCopOpcode()) {
                 case 0x4:
                     LOG_DEBUG("MTC0: rt:{:#x}, rd:{:#x}\n", instruction.getRT(), instruction.getRD());
-                    Cop0R[instruction.getRD()] = getR(instruction.getRT());
+                    switch(static_cast<Cop0RegAlias>(instruction.getRD())){
+                        case Cop0RegAlias::SR:
+                            Cop0R[instruction.getRD()] = getR(instruction.getRT());
+                            break;
+                        default:
+                            LOG("Unhandled write to COP0 Register {:#x}, val:{:#x}\n", instruction.getRD(), getR(instruction.getRT()));
+                    }
+                    //Cop0R[instruction.getRD()] = getR(instruction.getRT());
                     break;
                 default:
                     LOG("Unhandled instruction: {:#x}, opcode:{:#x}, copopcode:{:#x}\n", instruction.whole, instruction.getOpcode(), instruction.getCopOpcode());
@@ -322,7 +328,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x23:
-        // LW
+        // LW - Load Word
         LOG_DEBUG("LW: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
             if(getCop0R(Cop0RegAlias::SR) & 0x10000) {
@@ -365,7 +371,7 @@ void CPU::decodeExecute(Instruction instruction) {
         }
         break;
     case 0x2b:
-        // SW
+        // SW - Store Word
         LOG_DEBUG("SW: base:{:#x}, rt:{:#x}, offset {:#x}\n", instruction.getBase(), instruction.getRT(), instruction.getOffset());
         {
             if(getCop0R(Cop0RegAlias::SR) & 0x10000) {
